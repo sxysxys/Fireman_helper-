@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:id="@+id/ll_info_recco"
+    android:background="@drawable/bg_round_white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="15.0dip"
+            android:background="@drawable/person_information"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/recco_information"
+                android:textColor="@color/white"
+                android:textSize="12.0sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+
+                android:text="@string/dev_eui"/>
+
+            <TextView
+                android:id="@+id/tv_info_serial_number"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="@string/person_name"/>
+
+            <TextView
+                android:id="@+id/tv_info_name"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="@string/gesture"/>
+
+            <TextView
+                android:id="@+id/tv_info_gesture"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="@string/latitude"/>
+
+            <TextView
+                android:id="@+id/tv_info_latitude"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="@string/longitude"/>
+
+            <TextView
+                android:id="@+id/tv_info_longitude"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="@string/temperature"/>
+
+            <TextView
+                android:id="@+id/tv_info_temperature"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="@string/alarm_state"/>
+
+            <TextView
+                android:id="@+id/tv_info_alarm_state"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="入伍时间："/>
+
+            <TextView
+                android:id="@+id/tv_info_enlist_time"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="军衔："/>
+
+            <TextView
+                android:id="@+id/tv_info_grade"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="6dp">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="职位："/>
+
+            <TextView
+                android:id="@+id/tv_info_position"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</LinearLayout>

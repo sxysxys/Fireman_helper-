@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/bg_round_white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="45.0dip"
+            android:background="@drawable/person_information"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nfc_info_title"
+                android:textColor="@color/white"
+                android:textSize="16.0sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/empty_ll"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_no_data"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/touch_watch"
+                android:textColor="@color/txt_color"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/info_ll"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="编号："/>
+
+                <TextView
+                    android:id="@+id/tv_info_serial_number"
+                    style="@style/NfcInfoValueEditText"/>
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="姓名："/>
+
+                <EditText
+                    android:id="@+id/tv_info_name"
+                    style="@style/NfcInfoValueEditText"
+                    android:text="张三"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="性别："/>
+
+                <EditText
+                    android:id="@+id/tv_info_gender"
+                    style="@style/NfcInfoValueEditText"/>
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="年龄："/>
+
+                <EditText
+                    android:id="@+id/tv_info_age"
+                    style="@style/NfcInfoValueEditText"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="身高："/>
+
+                <EditText
+                    android:id="@+id/tv_info_height"
+                    style="@style/NfcInfoValueEditText"/>
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="体重："/>
+
+                <EditText
+                    android:id="@+id/tv_info_weight"
+                    style="@style/NfcInfoValueEditText"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="血型："/>
+
+                <EditText
+                    android:id="@+id/tv_info_blood_type"
+                    style="@style/NfcInfoValueEditText"/>
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="入伍时间："/>
+
+                <EditText
+                    android:id="@+id/tv_info_enlist_time"
+                    style="@style/NfcInfoValueEditText"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="军衔："/>
+
+                <EditText
+                    android:id="@+id/tv_info_grade"
+                    style="@style/NfcInfoValueEditText"/>
+
+                <TextView
+                    style="@style/FiremanInfoAttrEditText"
+                    android:text="职位："/>
+
+                <EditText
+                    android:id="@+id/tv_info_position"
+                    style="@style/NfcInfoValueEditText"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/color_248bfe"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <TextView
+                android:id="@+id/tv_info_cancel"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="取消"
+                android:textColor="@drawable/text_color_selector"
+                android:textSize="16sp"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/color_248bfe"/>
+
+            <TextView
+                android:id="@+id/tv_info_submit"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="确定"
+                android:textColor="@drawable/text_color_selector"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

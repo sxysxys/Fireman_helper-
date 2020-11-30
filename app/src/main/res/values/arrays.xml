@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="command">
+        <item>进攻</item>
+        <item>撤退</item>
+        <item>集合</item>
+        <item>待命</item>
+        <item>请命令</item>
+        <item>开北斗</item>
+    </string-array>
+
+    <string-array name="person">
+        <item>唐传高</item>
+        <item>李少华</item>
+        <item>杨伟强</item>
+        <item>范金乐</item>
+        <item>左伟</item>
+        <item>潘树飞</item>
+        <item>胡成</item>
+    </string-array>
+
+    <string-array name="rules">
+        <item>优秀</item>
+        <item>良好</item>
+        <item>及格</item>
+        <item>不及格</item>
+    </string-array>
+
+</resources>

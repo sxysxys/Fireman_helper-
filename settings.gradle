@@ -1,0 +1,2 @@
+include ':app', ':ok-usb', ':nice-spinner', ':library'
+rootProject.name='HjqHcSys'

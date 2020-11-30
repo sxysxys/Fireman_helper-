@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal">
+
+    <CheckBox
+        android:layout_gravity="center_vertical"
+        android:id="@+id/cb_select_fireman"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_gravity="center_vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/tv_serial_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="编号："
+            android:textSize="@dimen/info_list_text_size"/>
+
+        <com.rescue.hc.ui.widget.MarqueeTextView
+            android:id="@+id/mtv_serial_number"
+            style="@style/MarqueeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/info_list_text_size"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_gravity="center_vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2">
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="姓名："
+            android:textSize="@dimen/info_list_text_size"/>
+
+        <com.rescue.hc.ui.widget.MarqueeTextView
+            android:id="@+id/mtv_name"
+            style="@style/MarqueeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/info_list_text_size"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_gravity="center_vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tv_age"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="年龄："
+            android:textSize="@dimen/info_list_text_size"/>
+
+        <com.rescue.hc.ui.widget.MarqueeTextView
+            android:id="@+id/mtv_age"
+            style="@style/MarqueeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/info_list_text_size"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

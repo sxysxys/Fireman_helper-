@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffffff">
+
+    <include
+        android:id="@+id/empty_gps_layout"
+        layout="@layout/empty_gps_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
+
+    <RelativeLayout
+        android:id="@+id/rl_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <com.baidu.mapapi.map.MapView
+            android:id="@+id/bmapView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:clickable="true"
+            android:focusable="false"/>
+
+        <Button
+            android:id="@+id/btn_model"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="12dp"
+            android:layout_marginStart="12dp"
+            android:background="@mipmap/ic_model_normal"
+            android:button="@null"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_change"
+            android:layout_alignBaseline="@+id/btn_model"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="65dp"
+            android:visibility="invisible"
+            android:text="导航"
+            android:textColor="@color/color_248bfe"
+            android:textSize="@dimen/sp_16"/>
+
+        <Button
+            android:id="@+id/btn_test"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="测试"
+            android:visibility="gone"/>
+
+        <CheckBox
+            android:id="@+id/cb_satellite"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="7dp"
+            android:layout_marginTop="32dp"
+            android:adjustViewBounds="false"
+            android:background="@drawable/satellite_selector"
+            android:button="@null"
+            android:checked="false"/>
+
+        <CheckBox
+            android:id="@+id/cb_road_condition"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="7dp"
+            android:layout_marginTop="80dp"
+            android:adjustViewBounds="false"
+            android:background="@drawable/road_condition_selector"
+            android:button="@null"
+            android:checked="false"/>
+    </RelativeLayout>
+
+
+</RelativeLayout>

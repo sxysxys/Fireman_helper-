@@ -1,0 +1,35 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <com.rescue.hc.ui.view.CircleMenuLayout
+        android:id="@+id/id_menulayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@id/id_circle_menu_item_center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/img_circle"
+                android:layout_width="50.0dip"
+                android:layout_height="50.0dip"
+                android:layout_centerInParent="true"
+                android:background="@drawable/command"/>
+
+            <ImageView
+                android:layout_width="60.0dip"
+                android:layout_height="60.0dip"
+                android:layout_centerInParent="true"
+                android:background="@drawable/turnplate_mask_unlogin_normal"/>
+        </RelativeLayout>
+    </com.rescue.hc.ui.view.CircleMenuLayout>
+
+</LinearLayout>

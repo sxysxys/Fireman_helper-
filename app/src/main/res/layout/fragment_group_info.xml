@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relative"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/group_info_title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/txt_color"
+        android:orientation="horizontal">
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_number"/>
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_person_name"/>
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_person_id"/>
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_temperature"/>
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_longitude"/>
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_latitude"/>
+
+        <TextView
+            style="@style/TaskTitleText"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/group_alarm_state"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_list_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/group_info_title"/>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@id/fab_menu_function"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        fab:menu_backgroundColor="#ccffffff"
+        fab:menu_labels_ellipsize="end"
+        fab:menu_labels_singleLine="true">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_add_group"
+            style="@style/FabAllSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_bulk"
+            fab:fab_label="分组信息"
+            fab:fab_size="mini"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_edit_group"
+            style="@style/FabSingleSend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_single"
+            android:visibility="gone"
+            fab:fab_label="编辑分组"
+            fab:fab_size="mini"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_connect_setting"
+            style="@style/FabConnectSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_setting"
+            android:visibility="gone"
+            fab:fab_label="参数设置"
+            fab:fab_size="mini"/>
+
+        <!--<com.github.clans.fab.FloatingActionButton-->
+        <!--android:id="@+id/fab3"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:src="@mipmap/ic_disconnect"-->
+        <!--fab:fab_size="mini"-->
+        <!--fab:fab_label="Restore Button" />-->
+
+    </com.github.clans.fab.FloatingActionMenu>
+</RelativeLayout>

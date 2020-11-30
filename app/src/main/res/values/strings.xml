@@ -1,0 +1,57 @@
+<resources>
+    <string name="app_name">消防员后场接受装置</string>
+
+
+    <string name="empty_network_error">Network error, Click Retry</string>
+    <string name="empty_no_data">暂无人员在线</string>
+
+    <string name="confirm">确定</string>
+
+    <string name="edit_text_pref_optional_value">设置轮询时间</string>
+    <string name="optional_dialog_message">默认3秒，不低于3秒</string>
+    <string name="edit_text_pref_dialog_title">设置</string>
+    <string name="refresh">刷新</string>
+    <string name="login">登 录</string>
+    <string name="remember_password">记住密码</string>
+    <string name="no_gps">GPS未打开,不能使用此功能!</string>
+    <string name="person_information">人员信息</string>
+    <string name="recco_information">呼救器信息</string>
+    <string name="login_fail">登陆失败</string>
+    <string name="logining">登录中...</string>
+
+    <string name="nfc_info_title">信息录入</string>
+    <string name="touch_watch">请靠近手表</string>
+    <string name="history">测试</string>
+    <string name="task_remark">备注</string>
+    <string name="task_operate">操作</string>
+    <string name="empty_content">暂无任务</string>
+    <string name="train_info">训练详情</string>
+
+    <string name="query">查询</string>
+    <string name="submit">确认</string>
+    <string name="cancel">取消</string>
+
+
+    <string name="dev_eui">编号：</string>
+    <string name="person_name">姓名：</string>
+    <string name="gesture">姿态：</string>
+    <string name="longitude">经度：</string>
+    <string name="latitude">纬度：</string>
+    <string name="temperature">环境温度：</string>
+    <string name="alarm_state">状态：</string>
+    <string name="recco_number">编号:</string>
+    <string name="fireman_name">(消防员1)</string>
+
+    <string name="group">分组</string>
+    <string name="group_info">分组信息</string>
+    <string name="group_number">组编号</string>
+    <string name="group_person_id">人员Id</string>
+    <string name="group_person_name">姓名</string>
+    <string name="group_gesture">姿态</string>
+    <string name="group_longitude">经度</string>
+    <string name="group_latitude">纬度</string>
+    <string name="group_temperature">环境温度</string>
+    <string name="group_alarm_state">状态</string>
+    <string name="select_least_one">至少选择一名消防员</string>
+
+</resources>

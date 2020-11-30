@@ -1,0 +1,66 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="400dp"
+    android:layout_height="50dp"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingEnd="2dp"
+    android:paddingStart="2dp">
+
+    <TextView
+        android:id="@+id/tv_name"
+        style="@style/ScoreListTextView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="唐传高"
+        />
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:background="@color/divider_color"/>
+
+    <TextView
+        android:id="@+id/tv_train_name"
+        style="@style/ScoreListTextView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:text="越野跑"/>
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:background="@color/divider_color"/>
+
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/score_spinner"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_margin="2dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="12sp"
+        app:textTint="@color/login_button_color"/>
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:background="@color/divider_color"/>
+
+    <EditText
+        android:id="@+id/et_remark"
+        style="@style/ScoreListTextView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="start|center"
+        android:text="今天表现不错"/>
+
+
+</LinearLayout>

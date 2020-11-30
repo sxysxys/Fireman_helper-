@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@drawable/bg_round_white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="45.0dip"
+            android:background="@drawable/person_information"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/person_information"
+                android:textColor="@color/white"
+                android:textSize="16.0sp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="编号："/>
+
+            <TextView
+                android:id="@+id/tv_info_serial_number"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="姓名："/>
+
+            <EditText
+                android:id="@+id/tv_info_name"
+                style="@style/FiremanInfoAttrEditText"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="性别："/>
+
+            <TextView
+                android:id="@+id/tv_info_gender"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="年龄："/>
+
+            <TextView
+                android:id="@+id/tv_info_age"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="身高："/>
+
+            <TextView
+                android:id="@+id/tv_info_height"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="体重："/>
+
+            <TextView
+                android:id="@+id/tv_info_weight"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="血型："/>
+
+            <TextView
+                android:id="@+id/tv_info_blood_type"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="入伍时间："/>
+
+            <TextView
+                android:id="@+id/tv_info_enlist_time"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="军衔："/>
+
+            <TextView
+                android:id="@+id/tv_info_grade"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="6dp">
+
+            <TextView
+                style="@style/FiremanInfoAttrTextView"
+                android:text="职位："/>
+
+            <TextView
+                android:id="@+id/tv_info_position"
+                style="@style/FiremanInfoValueTextView"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/color_248bfe"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="取消"
+                android:textColor="@drawable/text_color_selector"
+                android:id="@+id/tv_info_cancel"
+                android:textSize="16sp"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/color_248bfe"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:id="@+id/tv_info_submit"
+                android:text="确定"
+                android:textColor="@drawable/text_color_selector"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

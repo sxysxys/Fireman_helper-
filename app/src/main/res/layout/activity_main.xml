@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/left_navigation_bar"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/ll_home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/img_home"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginRight="6dp"
+                    android:background="@drawable/ic_jiankong"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:gravity="center"
+                    android:text="监控"
+                    android:textColor="@color/left_navigation_bar_text_color"
+                    android:textSize="@dimen/left_navigation_bar_text_size" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:visibility="gone"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginRight="4dp"
+                    android:background="#FAFAFA" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/ll_navigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/img_navigation"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginRight="6dp"
+                    android:background="@drawable/ic_location"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:gravity="center"
+                    android:text="定位"
+                    android:textColor="@color/left_navigation_bar_text_color"
+                    android:textSize="@dimen/left_navigation_bar_text_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="visible"
+                android:id="@+id/ll_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/img_history"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginRight="6dp"
+                    android:background="@mipmap/history"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:gravity="center"
+                    android:text="@string/history"
+                    android:textColor="@color/left_navigation_bar_text_color"
+                    android:textSize="@dimen/left_navigation_bar_text_size" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_group"
+                android:visibility="visible"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/img_group"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="6dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginRight="6dp"
+                    android:background="@drawable/img_group"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:gravity="center"
+                    android:text="@string/group"
+                    android:textColor="@color/left_navigation_bar_text_color"
+                    android:textSize="@dimen/left_navigation_bar_text_size" />
+            </LinearLayout>
+
+
+
+
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/fragment_contain"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</LinearLayout>
