@@ -60,11 +60,16 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import org.jetbrains.annotations.NotNull;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -129,18 +134,20 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 
 	private float[] mValues, mAccelerometerValues, mMagneticFieldValues;
 	private float[] mR;
-	private List<Marker> mMarkers = new ArrayList<>();
+	private Map<Marker, InfoWindow> mMarkers = new HashMap<>();
 	private int mCurrentDirection;
 	private double mLastX;
 
 	MyLocationListener locationListener=null;
-	private LinearLayout mBdLinearLayout=null;
+//	private LinearLayout mBdLinearLayout=null;
 	private InfoWindow mInfoWindow=null;
+
 
 	String[] permissions = new String[]{
 			Manifest.permission.READ_PHONE_STATE,
 			Manifest.permission.ACCESS_FINE_LOCATION
 	};
+	private float zoom = 18;
 
 	private void requestPermission() {
 		RxPermissions rxPermissions = new RxPermissions(this);
@@ -161,7 +168,7 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 	@Override
 	public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_navigation, null);
-		mBdLinearLayout=(LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.info_window_display, null);
+//		mBdLinearLayout=(LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.info_window_display, null);
 		unbinder = ButterKnife.bind(this, view);
 		mMapView.onCreate(getActivity(),savedInstanceState);
 		requestPermission();
@@ -222,37 +229,61 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 		mAMap.getUiSettings().setRotateGesturesEnabled(false);
 		mAMap.setMaxAndMinZoomLevel(8,24);
 
-		mAMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+		mAMap.setOnMapLoadedCallback(() -> NavigationFragment.this.zoom = mAMap.getMapStatus().zoom);
+
+		/**
+		 * 设置地图状态改变监听
+		 */
+		mAMap.setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
 			@Override
-			public boolean onMarkerClick(Marker marker) {
+			public void onMapStatusChangeStart(MapStatus mapStatus) {
 
-//				ReccoData reccoData=new ReccoData();
-//				reccoData.setDevEui("00000002");
-//				reccoData.setReccoId("0002");
-//				reccoData.setLatitude(marker.getPosition().latitude);
-//				reccoData.setLongitude(marker.getPosition().longitude);
-//				reccoData.setAlarmState((byte) 3);
-//				reccoData.setGesture((byte) 3);
-//				reccoData.setTemperature(25.0f);
-//				createInfoWindow(mBdLinearLayout,reccoData);
-//				InfoWindow infoWindow = marker.getInfoWindow();
-//				if(infoWindow!=null)
-//				{
-//					infoWindow.setBitmapDescriptor(BitmapDescriptorFactory.fromView(mBdLinearLayout));
-//					marker.showInfoWindow(infoWindow);
-//				}
+			}
 
+			@Override
+			public void onMapStatusChangeStart(MapStatus mapStatus, int i) {
 
+			}
 
-				ReccoData reccoData=(ReccoData) marker.getExtraInfo().getSerializable("reccoData");
-				if(reccoData!=null)
-				{
-					marker.showInfoWindow(marker.getInfoWindow());
-					return true;
+			@Override
+			public void onMapStatusChange(MapStatus mapStatus) {
+
+			}
+
+			@Override
+			public void onMapStatusChangeFinish(MapStatus mapStatus) {
+				float zoom = mapStatus.zoom;
+
+				if(Math.abs(NavigationFragment.this.zoom-zoom)> 1 ){
+					// 你的代码...
+					NavigationFragment.this.zoom =zoom;
+					resetWindows();
+					for (Marker marker : mMarkers.keySet()) {
+						float v = (float) (0.1 + (mapStatus.zoom - 8) * 0.9 / 16);
+						marker.setScale(v);
+					}
 				}
-				return false;
 			}
 		});
+
+		/**
+		 * 设置map点击事件监听
+		 */
+		mAMap.setOnMarkerClickListener((marker -> {
+			InfoWindow infoWindow = mMarkers.get(marker);
+			if (infoWindow != null) {
+				if (!marker.isInfoWindowEnabled()) {
+					resetWindows();
+					// 绑定上，并且显示
+					infoWindow.setPosition(marker.getPosition());
+					infoWindow.setYOffset(-100);
+					marker.showInfoWindow(infoWindow);
+				} else {
+					resetWindows();
+				}
+			}
+			return true;
+		}));
 
 		mAMap.setMyLocationEnabled(true);
 		initLocation();
@@ -359,26 +390,49 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 
 					LatLng latLng = new LatLng(temp[0], temp[1]);
 					if (latitude > 0 && longitude > 0) {
-						Marker oldmarker = isExist(reccoData.getDevEui());
-						if (oldmarker != null) {
+						Marker olderMarker = isExist(reccoData.getDevEui());
+						if (olderMarker != null) {
 							Bundle bundle=new Bundle();
 							bundle.putSerializable("reccoData",reccoData);
-							oldmarker.setExtraInfo(bundle);
-							oldmarker.setPosition(latLng);
-							oldmarker.setVisible(true);
-							InfoWindow infoWindow= oldmarker.getInfoWindow();
-							if(infoWindow!=null)
-							{
-								createInfoWindow(mBdLinearLayout,reccoData);
-								infoWindow.setBitmapDescriptor(BitmapDescriptorFactory.fromView(mBdLinearLayout));
-								oldmarker.showInfoWindow(infoWindow);
-							}
+							olderMarker.setExtraInfo(bundle);
+							olderMarker.setPosition(latLng);
+							// 更新一下infowindow，重新设置view
+							InfoWindow infoWindow = mMarkers.get(olderMarker);
+//							LinearLayout inflate = (LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.info_window_display, null);
+//							createInfoWindow(inflate,reccoData);
+							// 更新view的值
+							assert infoWindow != null;
+							LinearLayout linearLayout = (LinearLayout)infoWindow.getView();
+							TextView serialNumber = linearLayout.findViewById(R.id.tv_info_serial_number);
+							serialNumber.setText(reccoData.getDevEui());
+							TextView name = linearLayout.findViewById(R.id.tv_info_name);
+							name.setText(((MainActivity) getActivity()).getOnLineFiremanName(reccoData.getDevEui()));
+							TextView tv_info_gesture = linearLayout.findViewById(R.id.tv_info_gesture);
+							tv_info_gesture.setText(ConvertUtils.getReccoGesture(reccoData.getGesture()));
+							TextView tv_info_latitude = linearLayout.findViewById(R.id.tv_info_latitude);
+							tv_info_latitude.setText(String.format("%.6f",reccoData.getLatitude()));
+							TextView tv_info_longitude = linearLayout.findViewById(R.id.tv_info_longitude);
+							tv_info_longitude.setText(String.format("%.6f",reccoData.getLongitude()));
+							TextView tv_info_temperature = linearLayout.findViewById(R.id.tv_info_temperature);
+							tv_info_temperature.setText(String.valueOf(reccoData.getTemperature()));
+							TextView tv_info_alarm_state = linearLayout.findViewById(R.id.tv_info_alarm_state);
+							byte alarmState=reccoData.getAlarmState();
 
-							MapStatus mapStatus = new MapStatus.Builder()
-									.target(latLng).build();
-							//定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
-							MapStatusUpdate mMapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
-							mAMap.animateMapStatus(mMapStatusUpdate);
+							byte bit=GetBit(alarmState,7);
+							if(bit==1)
+							{
+								tv_info_alarm_state.setText(ConvertUtils.getReccoAlarmState(5));
+							}
+							else
+							{
+								tv_info_alarm_state.setText(ConvertUtils.getReccoAlarmState((alarmState & 0x70) >> 4));
+							}
+							// 如果此时是没绑定上的状态，就隐藏；如果绑定上了，就显示
+							if (olderMarker.isInfoWindowEnabled()) {
+								infoWindow.setPosition(latLng);
+								infoWindow.setYOffset(-100);
+							}
+							olderMarker.setVisible(true);
 							return;
 						}
 
@@ -387,12 +441,14 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 							name = ((MainActivity) getActivity()).getOnLineFiremanName(reccoData.getDevEui());
 						}
 						Marker marker = generateMarker(latLng, reccoData, name);
-						createInfoWindow(mBdLinearLayout,reccoData);
-						InfoWindow infoWindow=new InfoWindow(mBdLinearLayout,latLng,-100);
+						// 每次只要是新来的，给他创建一个弹框
+						InfoWindow infoWindow = getInfoWindow(reccoData, latLng);
+						mMarkers.put(marker, infoWindow);
+
+						// 将其他的window取消显示，并且解绑所有的marker
+						resetWindows();
+						// 将infoWindow与marker进行绑定
 						marker.showInfoWindow(infoWindow);
-//						mAMap.showInfoWindow(infoWindow);
-//						marker.setVisible(true);
-						mMarkers.add(marker);
 						MapStatus mapStatus = new MapStatus.Builder()
 								.target(latLng).build();
 						//定义MapStatusUpdate对象，以便描述地图状态将要发生的变化
@@ -408,20 +464,53 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 
 	}
 
+	/**
+	 * 解绑所有window，并且在地图上清除
+	 */
+	private void resetWindows() {
+		hideOtherWindows();
+		mAMap.hideInfoWindow();
+	}
+
+	@NotNull
+	private InfoWindow getInfoWindow(ReccoData reccoData, LatLng latLng) {
+		LinearLayout inflate = (LinearLayout) LayoutInflater.from(getActivity()).inflate(R.layout.info_window_display, null);
+		createInfoWindow(inflate,reccoData);
+		return new InfoWindow(inflate,latLng,-100);
+	}
+
+	/**
+	 * 取消所有infoWindow的绑定
+	 */
+	private void hideOtherWindows() {
+		for (Marker mMarker : mMarkers.keySet()) {
+			mMarker.hideInfoWindow();
+		}
+	}
+
 	private Marker isExist(String id) throws InterruptedException {
-		if (mMarkers != null && mMarkers.size() > 0) {
-			for (int i = 0; i < mMarkers.size(); i++) {
-
-				Marker marker = mMarkers.get(i);
-				ReccoData reccoData = (ReccoData) marker.getExtraInfo().getSerializable("reccoData");
-				if(reccoData!=null)
-				{
-					if (reccoData.getDevEui().equals(id)) {
-						marker.setVisible(false);
-						return marker;
-					}
+//		if (mMarkers != null && mMarkers.size() > 0) {
+//			for (int i = 0; i < mMarkers.size(); i++) {
+//
+////				Marker marker = mMarkers.get(i);
+////				ReccoData reccoData = (ReccoData) marker.getExtraInfo().getSerializable("reccoData");
+////				if(reccoData!=null)
+////				{
+////					if (reccoData.getDevEui().equals(id)) {
+////						marker.setVisible(false);
+////						return marker;
+////					}
+////				}
+//
+//			}
+//		}
+		for (Marker marker : mMarkers.keySet()) {
+			ReccoData reccoData = (ReccoData) marker.getExtraInfo().getSerializable("reccoData");
+			if (reccoData != null) {
+				if (reccoData.getDevEui().equals(id)) {
+					marker.setVisible(false);
+					return marker;
 				}
-
 			}
 		}
 		return null;
@@ -453,10 +542,10 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 				//LogUtils.d(TAG,String.valueOf(latLng.latitude)+String.valueOf(latLng.longitude));
 
 				Marker marker = generateMarker(latLng,reccoData,"李阳");
-				createInfoWindow(mBdLinearLayout,reccoData);
-				marker.setVisible(true);
-				mInfoWindow=new InfoWindow(mBdLinearLayout,latLng,-100);
-				marker.showInfoWindow(mInfoWindow);
+//				createInfoWindow(mBdLinearLayout,reccoData);
+//				marker.setVisible(true);
+//				mInfoWindow=new InfoWindow(mBdLinearLayout,latLng,-100);
+//				marker.showInfoWindow(mInfoWindow);
 //				mAMap.moveCamera(CameraUpdateFactory.changeLatLng(latLng));
 //                int m=marker.getIcons().size();
 //                BitmapDescriptor bitmapDescriptor = marker.getIcons().get(0);
@@ -464,12 +553,12 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 //					mMarkers.add(marker);
 //				}
 				break;
-			case R.id.btn_change:
-				if(mInfoWindow!=null)
-				{
-					mAMap.hideInfoWindow();
-				}
-				break;
+//			case R.id.btn_change:
+//				if(mInfoWindow!=null)
+//				{
+//					mAMap.hideInfoWindow();
+//				}
+//				break;
 			default:
 				break;
 		}
@@ -529,32 +618,31 @@ public class NavigationFragment extends BaseFragment implements SensorEventListe
 			OverlayOptions oo = new MarkerOptions().position(latLng).icon(markerIcon).draggable(false).zIndex(9).extraInfo(bundle);
 			return (Marker) mAMap.addOverlay(oo);
 		}
-
 		return null;
 	}
 
 	private void createInfoWindow(LinearLayout linearLayout,ReccoData reccoData)
 	{
-		InfoWindowHolder holder = null;
-//		holder.tv_info_serial_number = (TextView) linearLayout.findViewById(R.id.tv_info_serial_number);
-//		holder.tv_info_name = (TextView) linearLayout.findViewById(R.id.tv_info_name);
-//		holder.tv_info_gesture = (TextView) linearLayout.findViewById(R.id.tv_info_gesture);
-//		holder.tv_info_latitude = (TextView) linearLayout.findViewById(R.id.tv_info_latitude);
-//		holder.tv_info_longitude = (TextView) linearLayout.findViewById(R.id.tv_info_longitude);
-//		holder.tv_info_temperature = (TextView) linearLayout.findViewById(R.id.tv_info_temperature);
-//		holder.tv_info_alarm_state = (TextView) linearLayout.findViewById(R.id.tv_info_alarm_state);
-		if (linearLayout.getTag() == null) {
-			holder = new InfoWindowHolder();
-			holder.tv_info_serial_number = (TextView) linearLayout.findViewById(R.id.tv_info_serial_number);
-			holder.tv_info_name = (TextView) linearLayout.findViewById(R.id.tv_info_name);
-			holder.tv_info_gesture = (TextView) linearLayout.findViewById(R.id.tv_info_gesture);
-			holder.tv_info_latitude = (TextView) linearLayout.findViewById(R.id.tv_info_latitude);
-			holder.tv_info_longitude = (TextView) linearLayout.findViewById(R.id.tv_info_longitude);
-			holder.tv_info_temperature = (TextView) linearLayout.findViewById(R.id.tv_info_temperature);
-			holder.tv_info_alarm_state=(TextView) linearLayout.findViewById(R.id.tv_info_alarm_state);
-			linearLayout.setTag(holder);
-		}
-		holder = (InfoWindowHolder) linearLayout.getTag();
+		InfoWindowHolder holder = new InfoWindowHolder();
+		holder.tv_info_serial_number = linearLayout.findViewById(R.id.tv_info_serial_number);
+		holder.tv_info_name = linearLayout.findViewById(R.id.tv_info_name);
+		holder.tv_info_gesture = linearLayout.findViewById(R.id.tv_info_gesture);
+		holder.tv_info_latitude = linearLayout.findViewById(R.id.tv_info_latitude);
+		holder.tv_info_longitude = linearLayout.findViewById(R.id.tv_info_longitude);
+		holder.tv_info_temperature = linearLayout.findViewById(R.id.tv_info_temperature);
+		holder.tv_info_alarm_state = linearLayout.findViewById(R.id.tv_info_alarm_state);
+//		if (linearLayout.getTag() == null) {
+//			holder = new InfoWindowHolder();
+//			holder.tv_info_serial_number = (TextView) linearLayout.findViewById(R.id.tv_info_serial_number);
+//			holder.tv_info_name = (TextView) linearLayout.findViewById(R.id.tv_info_name);
+//			holder.tv_info_gesture = (TextView) linearLayout.findViewById(R.id.tv_info_gesture);
+//			holder.tv_info_latitude = (TextView) linearLayout.findViewById(R.id.tv_info_latitude);
+//			holder.tv_info_longitude = (TextView) linearLayout.findViewById(R.id.tv_info_longitude);
+//			holder.tv_info_temperature = (TextView) linearLayout.findViewById(R.id.tv_info_temperature);
+//			holder.tv_info_alarm_state=(TextView) linearLayout.findViewById(R.id.tv_info_alarm_state);
+//			linearLayout.setTag(holder);
+//		}
+//		holder = (InfoWindowHolder) linearLayout.getTag();
 
 		holder.tv_info_serial_number.setText(reccoData.getDevEui());
 
