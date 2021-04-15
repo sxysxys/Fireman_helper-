@@ -20,7 +20,13 @@ android {
         }
         ndk {
             //设置支持的SO库架构（开发者可以根据需要，选择一个或多个平台的so）
+            moduleName "zyapi_common"
             abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "arm64-v8a", "x86_64"
+        }
+        sourceSets {
+            main {
+                jniLibs.srcDirs = ['libs']
+            }
         }
 
     }
@@ -84,7 +90,7 @@ dependencies {
     //控件绑定
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.1'
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.41'
-    implementation 'com.github.ybq:AndroidSpinKit:v1.0.0'
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
     implementation 'com.github.clans:fab:1.6.4'
     implementation 'net.steamcrafted:materialiconlib:1.1.5'
     implementation 'org.conscrypt:conscrypt-openjdk-uber:2.2.1'

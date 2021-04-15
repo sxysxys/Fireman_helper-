@@ -127,7 +127,14 @@ public class HomeFragment extends BaseFragment implements HomeContract.View {
 	@Override
 	public void onResume() {
 		super.onResume();
+		Timber.d("shen123:onResume:%s", this.getClass().getName());
+		highGpio();
+	}
 
+	private void highGpio() {
+		if (communicationService != null) {
+			communicationService.highGpio();
+		}
 	}
 
 	private void initFiremanReccoVoList()
@@ -810,11 +817,24 @@ public class HomeFragment extends BaseFragment implements HomeContract.View {
 		}
 	}
 
-    @Override
+	@Override
+	public void onPause() {
+		super.onPause();
+		// 将相应的位置低
+		Timber.d("shen123:onPause:%s", this.getClass().getName());
+		lowGpio();
+	}
+
+	private void lowGpio() {
+		if (communicationService != null) {
+			communicationService.closeGpio();
+		}
+	}
+
+	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-
-
+		Timber.d("shen123:onDestroyView:%s", this.getClass().getName());
 		if (unbinder != null) {
 			unbinder.unbind();
 		}
@@ -822,6 +842,7 @@ public class HomeFragment extends BaseFragment implements HomeContract.View {
 			homePresenter = null;
 		}
 		if (communicationService != null) {
+			Timber.d("正在关闭服务...");
 			communicationService.closeService();
 			if (isBound) {
 				if (getActivity() != null) {

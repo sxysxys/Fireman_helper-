@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.squareup.leakcanary:leakcanary-android-no-op:1.6.1@aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0806fb4f6ecefb7df5a0b8653284a10f/leakcanary-android-no-op-1.6.1/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0806fb4f6ecefb7df5a0b8653284a10f/leakcanary-android-no-op-1.6.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/0806fb4f6ecefb7df5a0b8653284a10f/leakcanary-android-no-op-1.6.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/98c05397cf6dae2c2b4e0e2caaf299ee/leakcanary-android-no-op-1.6.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/98c05397cf6dae2c2b4e0e2caaf299ee/leakcanary-android-no-op-1.6.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/98c05397cf6dae2c2b4e0e2caaf299ee/leakcanary-android-no-op-1.6.1/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.leakcanary/leakcanary-android-no-op/1.6.1/97277eb8b21bd511bb7f63e8a8ee3f404c23fbb9/leakcanary-android-no-op-1.6.1-javadoc.jar!/" />

@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
+import android.zyapi.CommonApi;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -43,10 +44,12 @@ import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import io.reactivex.functions.Consumer;
@@ -65,14 +68,16 @@ import static com.rescue.hc.lib.component.EventTag.TOAST_INFO_STATUS;
  * </pre>
  */
 public class MainActivity extends BaseActivity implements MainContract.View {
-	private Fragment homeFragment, navigationFragment,recvDataFragment,groupInfoFragment;
-	private boolean isWriteNfc = false;
-	private String nfcWriteInfo = "";
-	private MainPresenter mainPresenter;
-	private Intent onHomeIntent;
-	private final String TAG = MainActivity.class.getSimpleName();
+    private Fragment homeFragment, navigationFragment, recvDataFragment, groupInfoFragment;
+    private boolean isWriteNfc = false;
+    private String nfcWriteInfo = "";
+    private MainPresenter mainPresenter;
+    private Intent onHomeIntent;
+    private final String TAG = MainActivity.class.getSimpleName();
+	private CommonApi mCommonApi;
+
 	@Override
-	public void setLayoutId() {
+    public void setLayoutId() {
 
 //		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //			View decorView = getWindow().getDecorView();
@@ -81,423 +86,422 @@ public class MainActivity extends BaseActivity implements MainContract.View {
 //		}
 
 
-		// 屏幕保持不暗不关闭
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        // 屏幕保持不暗不关闭
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		setContentView(R.layout.activity_main);
-		mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-		initUsbReceiver();
-		//findUsb();
-	}
+        setContentView(R.layout.activity_main);
+//        mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+//        initUsbReceiver();
 
-	@Override
-	public void initView() {
+        //findUsb();
+    }
 
-		RxPermissions rxPermissions = new RxPermissions(this);
-		rxPermissions
-				.request(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE})
-				.subscribe(new Consumer<Boolean>() {
-					@Override
-					public void accept(Boolean aBoolean) throws Exception {
-						if (!aBoolean) {
-							ToastUtils.warning("请允许权限", false);
-							finish();
-						} else {
-							if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-								// TODO: Consider calling
-								//    ActivityCompat#requestPermissions
-								// here to request the missing permissions, and then overriding
-								//   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-								//                                          int[] grantResults)
-								// to handle the case where the user grants the permission. See the documentation
-								// for ActivityCompat#requestPermissions for more details.
-								return;
-							}
+    @Override
+    public void initView() {
 
-						}
-					}
-				});
+        RxPermissions rxPermissions = new RxPermissions(this);
+        rxPermissions
+                .request(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE})
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(Boolean aBoolean) throws Exception {
+                        if (!aBoolean) {
+                            ToastUtils.warning("请允许权限", false);
+                            finish();
+                        } else {
+                            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                                // TODO: Consider calling
+                                //    ActivityCompat#requestPermissions
+                                // here to request the missing permissions, and then overriding
+                                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                //                                          int[] grantResults)
+                                // to handle the case where the user grants the permission. See the documentation
+                                // for ActivityCompat#requestPermissions for more details.
+                                return;
+                            }
 
-
-
-		homeFragment = new HomeFragment();
-		navigationFragment = new NavigationFragment();
-		recvDataFragment=new RecvDataFragment();
-		groupInfoFragment=new GroupInfoFragment();
-
-		getSupportFragmentManager().beginTransaction()
-				.add(R.id.fragment_contain, homeFragment, HomeFragment.class.getSimpleName()).show(homeFragment)
-				.add(R.id.fragment_contain, navigationFragment, NavigationFragment.class.getSimpleName()).hide(navigationFragment)
-				.add(R.id.fragment_contain, recvDataFragment, RecvDataFragment.class.getSimpleName()).hide(recvDataFragment)
-				.add(R.id.fragment_contain,groupInfoFragment,GroupInfoFragment.class.getSimpleName()).hide(groupInfoFragment)
-				.commit();
-		getSupportFragmentManager().beginTransaction().show(homeFragment).commit();
-
-	}
-
-	private BroadcastReceiver mUsbReceiver;
-
-	private UsbManager mUsbManager;
-	private UsbSerialPort mSerialPort;
-	private List<UsbSerialPort> mEntries = new ArrayList<UsbSerialPort>();
-	private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
-
-	private void initUsbReceiver()
-	{
-
-		mUsbReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				if(intent.getAction().equals(INTENT_ACTION_GRANT_USB)) {
-					if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-						// TODO: 2020/03/25
-						if(mEntries!=null && mEntries.size()>0)
-						{
-							mSerialPort=mEntries.get(0);
-							//CommunicationService.sPort=mSerialPort;
-							EventMessage message=new EventMessage(mSerialPort,INIT_USB_PORT);
-							EventBus.getDefault().post(message);
-							Log.d(TAG,mSerialPort.getSerial());
-						}
-
-					} else {
-						Toast.makeText(context, "USB permission denied", Toast.LENGTH_SHORT).show();
-					}
-				}
-			}
-		};
+                        }
+                    }
+                });
 
 
-	}
+        homeFragment = new HomeFragment();
+        navigationFragment = new NavigationFragment();
+        recvDataFragment = new RecvDataFragment();
+        groupInfoFragment = new GroupInfoFragment();
 
-	private void findUsb()
-	{
-		final List<UsbSerialDriver> drivers =
-				UsbSerialProber.getDefaultProber().findAllDrivers(mUsbManager);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_contain, homeFragment, HomeFragment.class.getSimpleName()).show(homeFragment)
+                .add(R.id.fragment_contain, navigationFragment, NavigationFragment.class.getSimpleName()).hide(navigationFragment)
+                .add(R.id.fragment_contain, recvDataFragment, RecvDataFragment.class.getSimpleName()).hide(recvDataFragment)
+                .add(R.id.fragment_contain, groupInfoFragment, GroupInfoFragment.class.getSimpleName()).hide(groupInfoFragment)
+                .commit();
+        getSupportFragmentManager().beginTransaction().show(homeFragment).commit();
 
-		for (final UsbSerialDriver driver : drivers) {
-			final List<UsbSerialPort> ports = driver.getPorts();
-			Log.d(TAG, String.format("+ %s: %s port%s",
-					driver, Integer.valueOf(ports.size()), ports.size() == 1 ? "" : "s"));
-			mEntries.addAll(ports);
-		}
-	}
+    }
 
-	private static final int MESSAGE_REFRESH = 101;
-	private static final int MESSAGE_PORT = 102;
-	private static final long REFRESH_TIMEOUT_MILLIS = 3000;
-	private final Handler mHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-				case MESSAGE_REFRESH:
-					refreshDeviceList();
-					//mHandler.sendEmptyMessageDelayed(MESSAGE_REFRESH, REFRESH_TIMEOUT_MILLIS);
+    private BroadcastReceiver mUsbReceiver;
 
-					break;
-				case MESSAGE_PORT:
-					if(mEntries!=null  && mEntries.size()>0)
-					{
-						mSerialPort=mEntries.get(0);
-						UsbDevice device = mSerialPort.getDriver().getDevice();
-						if (!mUsbManager.hasPermission(device)) {
-							PendingIntent usbPermissionIntent = PendingIntent.getBroadcast(MainActivity.this, 0, new Intent(INTENT_ACTION_GRANT_USB), 0);
-							mUsbManager.requestPermission(device, usbPermissionIntent);
+    private UsbManager mUsbManager;
+    private UsbSerialPort mSerialPort;
+    private List<UsbSerialPort> mEntries = new ArrayList<UsbSerialPort>();
+    private static final String INTENT_ACTION_GRANT_USB = BuildConfig.APPLICATION_ID + ".GRANT_USB";
 
-						} else {
-							EventMessage message=new EventMessage(mSerialPort,INIT_USB_PORT);
-							EventBus.getDefault().post(message);
-							//Log.d(TAG,mSerialPort.getSerial());
-						}
-					}
-					break;
-				default:
-					super.handleMessage(msg);
-					break;
-			}
-		}
+    private void initUsbReceiver() {
 
-	};
+        mUsbReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(INTENT_ACTION_GRANT_USB)) {
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        // TODO: 2020/03/25
+                        if (mEntries != null && mEntries.size() > 0) {
+                            mSerialPort = mEntries.get(0);
+                            //CommunicationService.sPort=mSerialPort;
+                            EventMessage message = new EventMessage(mSerialPort, INIT_USB_PORT);
+                            EventBus.getDefault().post(message);
+                            Log.d(TAG, mSerialPort.getSerial());
+                        }
 
-
-
-
-	private void refreshDeviceList() {
-		new AsyncTask<Void, Void, List<UsbSerialPort>>() {
-			@Override
-			protected List<UsbSerialPort> doInBackground(Void... params) {
-				Log.d(TAG, "Refreshing device list ...");
-				SystemClock.sleep(1000);
-
-				final List<UsbSerialDriver> drivers =
-						UsbSerialProber.getDefaultProber().findAllDrivers(mUsbManager);
-
-				final List<UsbSerialPort> result = new ArrayList<UsbSerialPort>();
-				for (final UsbSerialDriver driver : drivers) {
-					final List<UsbSerialPort> ports = driver.getPorts();
-					Log.d(TAG, String.format("+ %s: %s port%s",
-							driver, Integer.valueOf(ports.size()), ports.size() == 1 ? "" : "s"));
-					result.addAll(ports);
-				}
-
-				return result;
-			}
-
-			@Override
-			protected void onPostExecute(List<UsbSerialPort> result) {
-			    if(result!=null && result.size()>0)
-                {
-                    mEntries.clear();
-                    mEntries.addAll(result);
-                    mHandler.sendEmptyMessage(MESSAGE_PORT);
-                    Log.d(TAG, "Done refreshing, " + mEntries.size() + " entries found.");
+                    } else {
+                        Toast.makeText(context, "USB permission denied", Toast.LENGTH_SHORT).show();
+                    }
                 }
-			    else
-                {
-                    mHandler.sendEmptyMessage(MESSAGE_REFRESH);
+            }
+        };
+
+
+    }
+
+    private void findUsb() {
+        final List<UsbSerialDriver> drivers =
+                UsbSerialProber.getDefaultProber().findAllDrivers(mUsbManager);
+
+        for (final UsbSerialDriver driver : drivers) {
+            final List<UsbSerialPort> ports = driver.getPorts();
+            Log.d(TAG, String.format("+ %s: %s port%s",
+                    driver, Integer.valueOf(ports.size()), ports.size() == 1 ? "" : "s"));
+            mEntries.addAll(ports);
+        }
+    }
+
+    private static final int MESSAGE_REFRESH = 101;
+    private static final int MESSAGE_PORT = 102;
+    private static final long REFRESH_TIMEOUT_MILLIS = 3000;
+//    private final Handler mHandler = new Handler() {
+//        @Override
+//        public void handleMessage(Message msg) {
+//            switch (msg.what) {
+//                case MESSAGE_REFRESH:
+//                    // 修改：进行消息的发送
+//                    EventMessage message = new EventMessage("", INIT_USB_PORT);
+//                    EventBus.getDefault().post(message);
+//                    break;
+//                default:
+//                    super.handleMessage(msg);
+//                    break;
+//            }
+//        }
+//    };
+
+    /**
+     * 初始化GPIO口
+     */
+	private void openGpio1() {
+		mCommonApi = new CommonApi();
+
+		mCommonApi.setGpioDir(80, 1);
+		mCommonApi.setGpioOut(80, 1);
+
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		mCommonApi.setGpioDir(79, 1);
+		mCommonApi.setGpioOut(79, 1);
+	}
+
+
+//	private void refreshDeviceList() {
+//		new AsyncTask<Void, Void, List<UsbSerialPort>>() {
+//			@Override
+//			protected List<UsbSerialPort> doInBackground(Void... params) {
+//				Log.d(TAG, "Refreshing device list ...");
+//				SystemClock.sleep(1000);
+//
+//				final List<UsbSerialDriver> drivers =
+//						UsbSerialProber.getDefaultProber().findAllDrivers(mUsbManager);
+//
+//				final List<UsbSerialPort> result = new ArrayList<UsbSerialPort>();
+//				for (final UsbSerialDriver driver : drivers) {
+//					final List<UsbSerialPort> ports = driver.getPorts();
+//					Log.d(TAG, String.format("+ %s: %s port%s",
+//							driver, Integer.valueOf(ports.size()), ports.size() == 1 ? "" : "s"));
+//					result.addAll(ports);
+//				}
+//
+//				return result;
+//			}
+//
+//			@Override
+//			protected void onPostExecute(List<UsbSerialPort> result) {
+//			    if(result!=null && result.size()>0)
+//                {
+//                    mEntries.clear();
+//                    mEntries.addAll(result);
+//                    mHandler.sendEmptyMessage(MESSAGE_PORT);
+//                    Log.d(TAG, "Done refreshing, " + mEntries.size() + " entries found.");
+//                }
+//			    else
+//                {
+//                    mHandler.sendEmptyMessage(MESSAGE_REFRESH);
+//                }
+//
+//			}
+//
+//		}.execute((Void) null);
+//	}
+
+    @Override
+    public void initData(Intent intent) {
+        mainPresenter = new MainPresenter(this, this);
+        String aa = getIntent().getStringExtra("webNotification");
+        /**
+         * 在登陆界面接受到通知 并从打开任务界面  需要处理
+         */
+        if (!TextUtils.isEmpty(aa)) {
+            if (aa.equals(EventTag.NOTIFICATION)) {
+                Timber.d("initData");
+                onHomeIntent = intent;
+            }
+        }
+//        mHandler.sendEmptyMessage(MESSAGE_REFRESH);
+        //EventBus.getDefault().post(new EventMessage("", EventTag.LOGIN_FINISH));
+    }
+
+    @OnClick({R.id.img_home, R.id.img_navigation, R.id.img_history, R.id.img_group})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.img_home:
+                getSupportFragmentManager().beginTransaction().hide(navigationFragment).hide(recvDataFragment).hide(groupInfoFragment).show(homeFragment).commit();
+                break;
+            case R.id.img_navigation:
+                getSupportFragmentManager().beginTransaction().hide(homeFragment).hide(recvDataFragment).hide(groupInfoFragment).show(navigationFragment).commit();
+                break;
+            case R.id.img_history:
+                getSupportFragmentManager().beginTransaction().hide(homeFragment).hide(navigationFragment).hide(groupInfoFragment).show(recvDataFragment).commit();
+                break;
+            case R.id.img_group:
+                getSupportFragmentManager().beginTransaction().hide(homeFragment).hide(navigationFragment).hide(recvDataFragment).show(groupInfoFragment).commit();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void switchFragment() {
+        getSupportFragmentManager().beginTransaction().hide(homeFragment).show(navigationFragment).commit();
+    }
+
+    public List<String> getOnLineFireman() {
+        List<String> list = new ArrayList<>();
+        HomeFragment homeFragment1 = (HomeFragment) getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getSimpleName());
+        if (homeFragment1 != null) {
+            return homeFragment1.getFiremanReccoVoList();
+        }
+        return list;
+    }
+
+    public String getOnLineFiremanName(String watchId) {
+        HomeFragment homeFragment1 = (HomeFragment) getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getSimpleName());
+        if (homeFragment1 != null) {
+            return homeFragment1.getFiremanWatchName(watchId);
+        }
+        return "";
+    }
+
+    @Override
+    public void onReceiveEvent(EventMessage event) {
+        switch (event.getCode()) {
+            case SET_NFC_SUBMIT:
+                Fireman fireman = (Fireman) event.getData();
+                nfcWriteInfo = fireman.toString();
+                isWriteNfc = true;
+                break;
+            case SET_NFC_CANCEL:
+                nfcWriteInfo = "";
+                isWriteNfc = (boolean) event.getData();
+                break;
+            case TOAST_INFO_STATUS:
+                ToastInfo toastInfo = (ToastInfo) event.getData();
+                if (toastInfo == null) {
+                    return;
                 }
+                if (toastInfo.getType() == 1) {
+                    ToastUtils.success(toastInfo.getMsg(), toastInfo.isWithIcon());
+                } else if (toastInfo.getType() == 2) {
+                    ToastUtils.error(toastInfo.getMsg(), toastInfo.isWithIcon());
+                } else if (toastInfo.getType() == 3) {
+                    ToastUtils.info(toastInfo.getMsg(), toastInfo.isWithIcon());
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
-			}
-
-		}.execute((Void) null);
-	}
-
-	@Override
-	public void initData(Intent intent) {
-		mainPresenter = new MainPresenter(this, this);
-		String aa = getIntent().getStringExtra("webNotification");
-		/**
-		 * 在登陆界面接受到通知 并从打开任务界面  需要处理
-		 */
-		if (!TextUtils.isEmpty(aa)) {
-			if (aa.equals(EventTag.NOTIFICATION)) {
-				Timber.d("initData");
-				onHomeIntent = intent;
-			}
-		}
-
-		mHandler.sendEmptyMessage(MESSAGE_REFRESH);
-
-		//EventBus.getDefault().post(new EventMessage("", EventTag.LOGIN_FINISH));
-	}
-
-	@OnClick({R.id.img_home, R.id.img_navigation,R.id.img_history,R.id.img_group})
-	public void onViewClicked(View view) {
-		switch (view.getId()) {
-			case R.id.img_home:
-				getSupportFragmentManager().beginTransaction().hide(navigationFragment).hide(recvDataFragment).hide(groupInfoFragment).show(homeFragment).commit();
-				break;
-			case R.id.img_navigation:
-				getSupportFragmentManager().beginTransaction().hide(homeFragment).hide(recvDataFragment).hide(groupInfoFragment).show(navigationFragment).commit();
-				break;
-			case R.id.img_history:
-				getSupportFragmentManager().beginTransaction().hide(homeFragment).hide(navigationFragment).hide(groupInfoFragment).show(recvDataFragment).commit();
-				break;
-			case R.id.img_group:
-				getSupportFragmentManager().beginTransaction().hide(homeFragment).hide(navigationFragment).hide(recvDataFragment).show(groupInfoFragment).commit();
-				break;
-			default:
-				break;
-		}
-	}
-
-	public void switchFragment() {
-		getSupportFragmentManager().beginTransaction().hide(homeFragment).show(navigationFragment).commit();
-	}
-
-	public List<String> getOnLineFireman() {
-		List<String> list = new ArrayList<>();
-		HomeFragment homeFragment1 = (HomeFragment) getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getSimpleName());
-		if (homeFragment1 != null) {
-			return homeFragment1.getFiremanReccoVoList();
-		}
-		return list;
-	}
-
-	public String getOnLineFiremanName(String watchId) {
-		HomeFragment homeFragment1 = (HomeFragment) getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getSimpleName());
-		if (homeFragment1 != null) {
-			return homeFragment1.getFiremanWatchName(watchId);
-		}
-		return "";
-	}
-
-	@Override
-	public void onReceiveEvent(EventMessage event) {
-		switch (event.getCode()) {
-			case SET_NFC_SUBMIT:
-				Fireman fireman = (Fireman) event.getData();
-				nfcWriteInfo = fireman.toString();
-				isWriteNfc = true;
-				break;
-			case SET_NFC_CANCEL:
-				nfcWriteInfo = "";
-				isWriteNfc = (boolean) event.getData();
-				break;
-			case TOAST_INFO_STATUS:
-				ToastInfo toastInfo = (ToastInfo) event.getData();
-				if (toastInfo == null) {
-					return;
-				}
-				if (toastInfo.getType() == 1) {
-					ToastUtils.success(toastInfo.getMsg(), toastInfo.isWithIcon());
-				} else if (toastInfo.getType() == 2) {
-					ToastUtils.error(toastInfo.getMsg(), toastInfo.isWithIcon());
-				} else if (toastInfo.getType() == 3) {
-					ToastUtils.info(toastInfo.getMsg(), toastInfo.isWithIcon());
-				}
-				break;
-			default:
-				break;
-		}
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (onHomeIntent != null) {
-			onHomeIntent = null;
-		}
-		registerReceiver(mUsbReceiver, new IntentFilter(INTENT_ACTION_GRANT_USB));
-	}
+    @Override
+    protected void onResume() {
+	    Timber.d("shen123:onResume:%s", this.getClass().getName());
+        super.onResume();
+        if (onHomeIntent != null) {
+            onHomeIntent = null;
+        }
+//        registerReceiver(mUsbReceiver, new IntentFilter(INTENT_ACTION_GRANT_USB));
+    }
 
 
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//        if (intent == null) {
+//            return;
+//        }
+//        /**
+//         * 在主界面接受通知
+//         */
+//        if (TextUtils.isEmpty(intent.getAction())) {
+//            Timber.d("onNewIntent");
+//            String aa = intent.getStringExtra("webNotification");
+//            assert aa != null;
+//            if (aa.equals(EventTag.NOTIFICATION)) {
+//                onHomeIntent = intent;
+//                return;
+//            }
+//        }
+//        if (isWriteNfc) {
+//            isWriteNfc = false;
+//            if (TextUtils.isEmpty(nfcWriteInfo)) {
+//                showSetNfcMeg();
+//                ToastUtils.warning("输入不能为空", true);
+//                return;
+//            }
+//            Fireman fireman = NfcNdef.getFiremanInfo(NfcNdef.readNfcTag(intent));
+//            if (fireman == null) {
+//                showSetNfcMeg();
+//                ToastUtils.warning("验证失败", true);
+//                return;
+//            }
+//            if (!fireman.getSerialNumber().equals(nfcWriteInfo.split(",")[0])) {
+//                showSetNfcMeg();
+//                ToastUtils.warning("编号不匹配", true);
+//                return;
+//            }
+//            writeNfc(intent);
+//        } else {
+//            Fireman fireman = NfcNdef.getFiremanInfo(NfcNdef.readNfcTag(intent));
+//            if (fireman == null) {
+//                return;
+//            }
+//            EventBus.getDefault().post(new EventMessage(fireman, EventTag.NFC_INFO));
+//        }
+//    }
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		if (intent == null) {
-			return;
-		}
-		/**
-		 * 在主界面接受通知
-		 */
-		if (TextUtils.isEmpty(intent.getAction())) {
-			Timber.d("onNewIntent");
-			String aa = intent.getStringExtra("webNotification");
-			if (aa.equals(EventTag.NOTIFICATION)) {
-				onHomeIntent = intent;
-				return;
-			}
-		}
-		if (isWriteNfc) {
-			isWriteNfc = false;
-			if (TextUtils.isEmpty(nfcWriteInfo)) {
-				showSetNfcMeg();
-				ToastUtils.warning("输入不能为空", true);
-				return;
-			}
-			Fireman fireman = NfcNdef.getFiremanInfo(NfcNdef.readNfcTag(intent));
-			if (fireman == null) {
-				showSetNfcMeg();
-				ToastUtils.warning("验证失败", true);
-				return;
-			}
-			if (!fireman.getSerialNumber().equals(nfcWriteInfo.split(",")[0])) {
-				showSetNfcMeg();
-				ToastUtils.warning("编号不匹配", true);
-				return;
-			}
-			writeNfc(intent);
-		} else {
-			Fireman fireman = NfcNdef.getFiremanInfo(NfcNdef.readNfcTag(intent));
-			if (fireman == null) {
-				return;
-			}
-			EventBus.getDefault().post(new EventMessage(fireman, EventTag.NFC_INFO));
-		}
-	}
+    private void showSetNfcMeg() {
+        EventBus.getDefault().post(new EventMessage("", EventTag.SET_NFC_STATUS));
+    }
 
-	private void showSetNfcMeg() {
-		EventBus.getDefault().post(new EventMessage("", EventTag.SET_NFC_STATUS));
-	}
+    private void writeNfc(Intent intent) {
+        if (NfcNdef.writeNfcTag(intent, nfcWriteInfo)) {
+            showSetNfcMeg();
+            ToastUtils.success("写入成功", true);
+            EventBus.getDefault().post(new EventMessage(getFireman(), EventTag.NFC_UPDATE_FIREMAN));
+        } else {
+            showSetNfcMeg();
+            ToastUtils.error("写入失败", true);
+        }
+    }
 
-	private void writeNfc(Intent intent) {
-		if (NfcNdef.writeNfcTag(intent, nfcWriteInfo)) {
-			showSetNfcMeg();
-			ToastUtils.success("写入成功", true);
-			EventBus.getDefault().post(new EventMessage(getFireman(), EventTag.NFC_UPDATE_FIREMAN));
-		} else {
-			showSetNfcMeg();
-			ToastUtils.error("写入失败", true);
-		}
-	}
+    private Fireman getFireman() {
+        String[] info = nfcWriteInfo.split(",");
+        if (info.length != 10) {
+            return null;
+        }
+        Fireman fireman1 = new Fireman();
+        fireman1.setSerialNumber(info[0]);
+        fireman1.setName(info[1]);
+        fireman1.setGender(info[2]);
+        fireman1.setBirth(info[3]);
+        fireman1.setHeight(info[4]);
+        fireman1.setWeight(info[5]);
+        fireman1.setBloodType(info[6]);
+        fireman1.setEnlistTime(info[7]);
+        fireman1.setGrade(info[8]);
+        fireman1.setPosition(info[9]);
+        return fireman1;
+    }
 
-	private Fireman getFireman() {
-		String[] info = nfcWriteInfo.split(",");
-		if (info.length != 10) {
-			return null;
-		}
-		Fireman fireman1 = new Fireman();
-		fireman1.setSerialNumber(info[0]);
-		fireman1.setName(info[1]);
-		fireman1.setGender(info[2]);
-		fireman1.setBirth(info[3]);
-		fireman1.setHeight(info[4]);
-		fireman1.setWeight(info[5]);
-		fireman1.setBloodType(info[6]);
-		fireman1.setEnlistTime(info[7]);
-		fireman1.setGrade(info[8]);
-		fireman1.setPosition(info[9]);
-		return fireman1;
-	}
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onBackPressed() {
+        new MessageDialog(this, R.style.baseDialog, (dialog, confirm, fireman, id) -> {
+            if (confirm) {
+                startCleanLeakActivity();
+//                unregisterReceiver(mUsbReceiver);
+//                mUsbReceiver = null;
+//                mHandler.removeMessages(MESSAGE_REFRESH);
+//                mHandler.removeMessages(MESSAGE_PORT);
 
-	@RequiresApi(api = Build.VERSION_CODES.N)
-	@Override
-	public void onBackPressed() {
-		new MessageDialog(this, R.style.baseDialog, (dialog, confirm, fireman, id) -> {
-			if (confirm) {
-				startCleanLeakActivity();
-				unregisterReceiver(mUsbReceiver);
-				mUsbReceiver=null;
-				mHandler.removeMessages(MESSAGE_REFRESH);
-				mHandler.removeMessages(MESSAGE_PORT);
+                //AppApplication.getApp().stopService();
+            }
+            dialog.dismiss();
+        }).setContent("是否退出监控系统？")
+                .show();
+    }
 
-				//AppApplication.getApp().stopService();
-			}
-			dialog.dismiss();
-		}).setContent("是否退出监控系统？")
-				.show();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
+    @Override
+    protected void onPause() {
+	    Timber.d("shen123:onPause:%s", this.getClass().getName());
+        super.onPause();
 //		unregisterReceiver(mUsbReceiver);
 //		mUsbReceiver=null;
 //        mHandler.removeMessages(MESSAGE_REFRESH);
 //        mHandler.removeMessages(MESSAGE_PORT);
-	}
+    }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mainPresenter != null) {
-			mainPresenter = null;
-		}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Timber.d("shen123:正在退出:%s", this.getClass().getName());
+        if (mainPresenter != null) {
+            mainPresenter = null;
+        }
 //		unregisterReceiver(mUsbReceiver);
 //		mUsbReceiver=null;
 //		mHandler.removeMessages(MESSAGE_REFRESH);
 //		mHandler.removeMessages(MESSAGE_PORT);
-		AppApplication.getApp().stopService();
-	}
+        AppApplication.getApp().stopService();
+    }
 
-	@Override
-	public void unbindSuccess() {
-		dismissWaitingDlg();
-		startCleanLeakActivity();
-	}
+    @Override
+    public void unbindSuccess() {
+        dismissWaitingDlg();
+        startCleanLeakActivity();
+    }
 
-	@Override
-	public void unbindFailed() {
-		dismissWaitingDlg();
-		startCleanLeakActivity();
-	}
+    @Override
+    public void unbindFailed() {
+        dismissWaitingDlg();
+        startCleanLeakActivity();
+    }
 
-	private void startCleanLeakActivity() {
-		startActivity(new Intent(this, CleanLeakActivity.class));
-		finish();
+    private void startCleanLeakActivity() {
+        startActivity(new Intent(this, CleanLeakActivity.class));
+        finish();
 
-	}
+    }
 
 
 }

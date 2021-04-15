@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.trello.navi2:navi:2.0.1@aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f7add472d604abf01fbb95f5bce3de8f/jetified-navi-2.0.1/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f7add472d604abf01fbb95f5bce3de8f/jetified-navi-2.0.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f7add472d604abf01fbb95f5bce3de8f/jetified-navi-2.0.1/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6804bd03a24306ed12c588ccbf52f26a/jetified-navi-2.0.1/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6804bd03a24306ed12c588ccbf52f26a/jetified-navi-2.0.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/6804bd03a24306ed12c588ccbf52f26a/jetified-navi-2.0.1/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.trello.navi2/navi/2.0.1/64affd4f2badef75b384f157baebed6ebe161f55/navi-2.0.1-javadoc.jar!/" />

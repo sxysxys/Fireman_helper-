@@ -1,5 +1,6 @@
 package com.rescue.hc.service;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
@@ -7,8 +8,12 @@ import android.content.Intent;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
+import android.zyapi.CommonApi;
 
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
@@ -22,10 +27,13 @@ import com.rescue.hc.event.EventMessage;
 import com.rescue.hc.lib.component.EventTag;
 import com.rescue.hc.lib.util.CrcUtil;
 import com.rescue.hc.lib.util.StringUtil;
+import com.rescue.hc.lib.util.ToastUtils;
+import com.rescue.hc.series.SeriesConstant;
 import com.rescue.hc.ui.fragment.HomeFragment;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,6 +66,7 @@ import static com.rescue.hc.lib.component.UartTag.readDuration;
 import static com.rescue.hc.lib.component.UartTag.writeFrameAddr;
 import static com.rescue.hc.lib.component.UartTag.writeFrameHeader;
 import static com.rescue.hc.lib.component.UartTag.writeTimeoutMills;
+import static java.lang.Thread.sleep;
 
 /**
  * <pre>
@@ -74,7 +83,7 @@ public class CommunicationService extends Service {
     private USB usb;
 
     private UsbManager mUsbManager;
-    public static UsbSerialPort sPort = null;
+//    public static UsbSerialPort sPort = null;
 
     //private List<WatchCmdInfo> watchCmdInfoList;
     private List<ReccoCmdInfo> mReccoCmdInfoList;
@@ -90,15 +99,42 @@ public class CommunicationService extends Service {
     private byte reccoAlarm3 = 0;//呼救器报警标志17-24
     private byte reccoAlarm4 = 0;//呼救器报警标志25-32
 
-    private ScheduledExecutorService executorService;
+    private ScheduledExecutorService scheduExecutorService;
     private volatile boolean sysRunToHome = false;
 
     private List<String> lostIdList = new ArrayList<>();
 
+    // 修改后的变量
+    private static final int REFRESH_CONNECT = 20;
+    private CommonApi mCommonApi;
+    private int mComFd;
+//    private boolean isOpen = false;
+    private final int MAX_RECV_BUF_SIZE = 512;
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            switch (msg.what) {
+                case REFRESH_CONNECT:
+                    // 初始化gpio
+                    openGpio1();
+                    // 打开串口
+                    openSeries();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+    private byte[] mBuf = new byte[MAX_RECV_BUF_SIZE + 1];
+    private byte[] recv;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        registerEventBus();
+//        registerEventBus();
+        Timber.d("开始注册服务%s", this.getClass().getName());
+        initSeriesConnection();
     }
 
     private List<UsbSerialPort> mEntries = new ArrayList<UsbSerialPort>();
@@ -131,8 +167,8 @@ public class CommunicationService extends Service {
         /**
          * 开定时器 2s发一次数据到服务器
          */
-        executorService = new ScheduledThreadPoolExecutor(1, namedThreadFactory);
-        executorService.scheduleAtFixedRate(() -> {
+        scheduExecutorService = new ScheduledThreadPoolExecutor(1, namedThreadFactory);
+        scheduExecutorService.scheduleAtFixedRate(() -> {
             if (sysRunToHome) {
                 lostIdList.clear();
                 // 计算此时超时的个数
@@ -219,69 +255,76 @@ public class CommunicationService extends Service {
 
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private SerialInputOutputManager mSerialIoManager;
-
-    private final SerialInputOutputManager.Listener mListener =
-            new SerialInputOutputManager.Listener() {
-
-                @Override
-                public void onRunError(Exception e) {
-                    //sendMessage(new ToastInfo(3, e.getMessage(), false));
-                    Log.v("CommunicationService", e.getMessage());
-                }
-
-                @Override
-                public void onNewData(final byte[] data) {
-                    mContext.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateReceivedData(data);
-                        }
-                    });
-//					updateReceivedData(data);
-                }
-            };
 
 
-    private void initSerialPort() {
-        if (sPort == null) {
-            sendMessage(new ToastInfo(3, "No serial device", false));
-        } else {
-            final UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+//    private SerialInputOutputManager mSerialIoManager;
 
-            UsbDeviceConnection connection = usbManager.openDevice(sPort.getDriver().getDevice());
-            if (connection == null) {
-                sendMessage(new ToastInfo(3, "Opening device failed", false));
-                return;
-            }
+//    private final SerialInputOutputManager.Listener mListener =
+//            new SerialInputOutputManager.Listener() {
+//
+//                @Override
+//                public void onRunError(Exception e) {
+//                    //sendMessage(new ToastInfo(3, e.getMessage(), false));
+//                    Log.v("CommunicationService", e.getMessage());
+//                }
+//
+//                @Override
+//                public void onNewData(final byte[] data) {
+//                    mContext.runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            updateReceivedData(data);
+//                        }
+//                    });
+////					updateReceivedData(data);
+//                }
+//            };
 
-            try {
-                sPort.open(connection);
-                sPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
 
-
-            } catch (IOException e) {
-                sendMessage(new ToastInfo(3, "Error opening device: " + e.getMessage(), false));
-                try {
-                    sPort.close();
-                } catch (IOException e2) {
-                    // Ignore.
-                }
-                sPort = null;
-                return;
-            }
-            sendMessage(new ToastInfo(1, "Serial device: " + sPort.getClass().getSimpleName(), false));
-
-        }
-
-        onDeviceStateChange();
-    }
+//    private void initSerialPort() {
+//        if (sPort == null) {
+//            sendMessage(new ToastInfo(3, "No serial device", false));
+//        } else {
+//            final UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+//
+//            UsbDeviceConnection connection = usbManager.openDevice(sPort.getDriver().getDevice());
+//            if (connection == null) {
+//                sendMessage(new ToastInfo(3, "Opening device failed", false));
+//                return;
+//            }
+//
+//            try {
+//                sPort.open(connection);
+//                sPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+//
+//
+//            } catch (IOException e) {
+//                sendMessage(new ToastInfo(3, "Error opening device: " + e.getMessage(), false));
+//                try {
+//                    sPort.close();
+//                } catch (IOException e2) {
+//                    // Ignore.
+//                }
+//                sPort = null;
+//                return;
+//            }
+//            sendMessage(new ToastInfo(1, "Serial device: " + sPort.getClass().getSimpleName(), false));
+//
+//        }
+//
+//        onDeviceStateChange();
+//    }
 
 
     ArrayList<Byte> mRecvBuf = new ArrayList<>();
 
 
     private void updateReceivedData(byte[] data) {
+//        if (data.length > 0) {
+//            ToastUtils.normal("数据长度: + " + data.length);
+//            return;
+//        }
+
         if (data == null || data.length == 0) {
             return;
         }
@@ -333,28 +376,36 @@ public class CommunicationService extends Service {
     }
 
 
-    private void stopIoManager() {
-        if (mSerialIoManager != null) {
-            mSerialIoManager.stop();
-            mSerialIoManager = null;
-        }
-    }
+//    private void stopIoManager() {
+//        if (mSerialIoManager != null) {
+//            mSerialIoManager.stop();
+//            mSerialIoManager = null;
+//        }
+//    }
 
-    private void startIoManager() {
-        if (sPort != null) {
-            mSerialIoManager = new SerialInputOutputManager(sPort, mListener);
-            mExecutor.submit(mSerialIoManager);
-        }
-    }
+//    private void startIoManager() {
+//        if (sPort != null) {
+//            mSerialIoManager = new SerialInputOutputManager(sPort, mListener);
+//            mExecutor.submit(mSerialIoManager);
+//        }
+//    }
 
-    private void onDeviceStateChange() {
-        stopIoManager();
-        startIoManager();
-    }
+//    private void onDeviceStateChange() {
+//        stopIoManager();
+//        startIoManager();
+//    }
 
 
     private void sendMessage(ToastInfo msg) {
         EventBus.getDefault().post(new EventMessage(msg, EventTag.TOAST_INFO));
+    }
+
+    public void closeGpio() {
+        closeGPIO1();
+    }
+
+    public void highGpio() {
+        openGpio1();
     }
 
     public class CommunicationBinder extends Binder {
@@ -424,7 +475,7 @@ public class CommunicationService extends Service {
 
         cmd[23] = dataFrameTail;
 
-        writeDataNew(cmd);
+        send(cmd);
         sendCount++;
 //        System.out.println(String.format("发送命令：%s", bytes2HexString(cmd)));
         //EventMessage message=new EventMessage(String.format("发送命令：%s",bytes2HexString(cmd)),BUS_SEND_CMD_DATA);
@@ -482,7 +533,8 @@ public class CommunicationService extends Service {
 
         cmd[23] = dataFrameTail;
 
-        writeDataNew(cmd);
+//        writeDataNew(cmd);
+        send(cmd);
         //EventMessage message=new EventMessage(String.format("发送命令：%s",bytes2HexString(cmd)),BUS_SEND_CMD_DATA);
         //EventBus.getDefault().post(message);
     }
@@ -493,9 +545,23 @@ public class CommunicationService extends Service {
         }
     }
 
-    private void writeDataNew(byte[] data) throws Exception {
-        if (sPort != null) {
-            sPort.write(data, writeTimeoutMills);
+//    private void writeDataNew(byte[] data) throws Exception {
+//        if (sPort != null) {
+//            sPort.write(data, writeTimeoutMills);
+//        }
+//    }
+
+    /**
+     * 修改：发送数据
+     * @param data
+     */
+    private void send(byte[] data) {
+        if (data == null)
+            return;
+        if (mComFd > 0) {
+            mCommonApi.writeCom(mComFd, data, data.length);
+        } else {
+            ToastUtils.normal("发送失败，未连接上串口...");
         }
     }
 
@@ -526,6 +592,7 @@ public class CommunicationService extends Service {
 
         ReccoData reccoData = new ReccoData();
         reccoData.setDevEui(dev_eui);
+        // TODO:试试用这个作为键
         reccoData.setReccoId(dev_eui.substring(dev_eui.length() - 8));
 
 
@@ -693,16 +760,70 @@ public class CommunicationService extends Service {
         EventBus.getDefault().post(eventMessageSp);
     }
 
-    @Subscribe(threadMode = ThreadMode.MainThread)
-    public void onReceiveEvent(EventMessage event) {
-        switch (event.getCode()) {
-            case INIT_USB_PORT:
-                sPort = (UsbSerialPort) event.getData();
-                initSerialPort();
-                break;
-            default:
-                break;
+//    @Subscribe(threadMode = ThreadMode.MainThread)
+//    public void onReceiveEvent(EventMessage event) {
+//        switch (event.getCode()) {
+//            case INIT_USB_PORT:
+////                sPort = (UsbSerialPort) event.getData();
+////                initSerialPort();
+//                initSeriesConnection();
+//                break;
+//            default:
+//                break;
+//        }
+//    }
+
+    private void initSeriesConnection() {
+        mHandler.sendEmptyMessage(REFRESH_CONNECT);
+    }
+
+    private void openSeries() {
+        Timber.d("正在打开串口...");
+        mComFd = mCommonApi.openCom(SeriesConstant.PORT, SeriesConstant.BAUD_RATE, 8, 'N', 1);
+        if (mComFd > 0) {
+            Toast.makeText(this, "打开串口成功，准备收发数据....", Toast.LENGTH_SHORT).show();
+//            isOpen = true;
+            startReadData();
+        } else {
+            Toast.makeText(this, "打开串口失败，正在重试....", Toast.LENGTH_SHORT).show();
+//            isOpen = false;
+            // 开始循环打开串口
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            mHandler.sendEmptyMessage(REFRESH_CONNECT);
         }
+    }
+
+    /**
+     * 启动线程循环读取数据
+     */
+    private void startReadData() {
+        mExecutor.execute(() -> {
+            while (mComFd > 0) {
+                int ret;
+                // 置零
+                Arrays.fill(mBuf, (byte) 0);
+                // 如果打开后没数据，就会阻塞
+                ret = mCommonApi.readComEx(mComFd, mBuf, MAX_RECV_BUF_SIZE,
+                        0, 0);
+                if (ret <= 0) {
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
+                Timber.d("此时的字节数ret = %d", ret);
+                byte[] recv = new byte[ret];
+                System.arraycopy(mBuf, 0, recv, 0, ret);
+                // 此时接入原来的解析
+                updateReceivedData(recv);
+            }
+        });
     }
 
     private byte GetBit(byte b, int index) {
@@ -747,33 +868,71 @@ public class CommunicationService extends Service {
 
 		sysRunToHome = false;
 		cancelTimer();
-        stopIoManager();
-        if (sPort != null) {
-            try {
-                sPort.close();
-            } catch (IOException e) {
-                // Ignore.
-            }
-            sPort = null;
+//        stopIoManager();
+//        if (sPort != null) {
+//            try {
+//                sPort.close();
+//            } catch (IOException e) {
+//                // Ignore.
+//            }
+//            sPort = null;
+//        }
+
+        // 修改：将引脚置低，关闭串口
+        if (mComFd > 0) {
+            mCommonApi.closeCom(mComFd);
+        }
+        closeGPIO1();
+    }
+
+    private void closeGPIO1(){
+
+        if(mCommonApi==null){
+
+            mCommonApi=new CommonApi();
+
         }
 
+        mCommonApi.setGpioDir(80, 1);
+        mCommonApi.setGpioOut(80, 0);
+
+        mCommonApi.setGpioDir(79, 1);
+        mCommonApi.setGpioOut(79, 0);
 
     }
 
+    private void openGpio1() {
+        if (mCommonApi == null) {
+            mCommonApi = new CommonApi();
+        }
+
+        mCommonApi.setGpioDir(80, 1);
+        mCommonApi.setGpioOut(80, 1);
+        try {
+            TimeUnit.MILLISECONDS.sleep(200);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        mCommonApi.setGpioDir(79, 1);
+        mCommonApi.setGpioOut(79, 1);
+    }
+
 	private void cancelTimer() {
-		if (executorService != null) {
+		if (scheduExecutorService != null) {
 			try {
-				executorService.shutdown();
+				scheduExecutorService.shutdown();
 				Timber.d("shutdown");
-				if (!executorService.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
-					executorService.shutdownNow();
+				if (!scheduExecutorService.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
+					scheduExecutorService.shutdownNow();
 					Timber.d("shutdownNow");
 				}
 			} catch (InterruptedException e) {
 				Timber.d(e.toString());
-				executorService.shutdownNow();
+				scheduExecutorService.shutdownNow();
 			}
-			executorService = null;
+			scheduExecutorService = null;
 		}
 	}
 
@@ -844,6 +1003,7 @@ public class CommunicationService extends Service {
      * @param cmdStatusInfo
      */
     public void sendBulkCmdFunction(ReccoCmdStatusInfo cmdStatusInfo) {
+//        send(new byte[] {1,2,3,4,5});
         if (mReccoCmdInfoList != null && mReccoCmdInfoList.size() > 0) {
             for (int i = 0; i < mReccoCmdInfoList.size(); i++) {
                 sendSingleCmdFunction(mReccoCmdInfoList.get(i).getDevEui(), cmdStatusInfo);

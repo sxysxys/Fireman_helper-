@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 import de.greenrobot.event.ThreadMode;
+import timber.log.Timber;
 
 /**
  * Created by Administrator on 2018/1/22.
@@ -25,12 +26,14 @@ public class BaseFragment extends RxFragment {
 		super.onCreate(savedInstanceState);
 		if (!EventBus.getDefault().isRegistered(this)) {
 			EventBus.getDefault().register(this);
+			Timber.d("shen123:注册成功:%s", this.getClass().getName());
 		}
-
 	}
+
 
 	@Override
 	public void onDestroy() {
+		Timber.d("shen123:正在退出:%s", this.getClass().getName());
 		super.onDestroy();
 		if (EventBus.getDefault().isRegistered(this)) {
 			EventBus.getDefault().unregister(this);

@@ -18,6 +18,7 @@ import butterknife.Unbinder;
 import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 import de.greenrobot.event.ThreadMode;
+import timber.log.Timber;
 
 /**
  * @author szc
